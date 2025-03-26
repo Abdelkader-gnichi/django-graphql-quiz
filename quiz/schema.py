@@ -27,9 +27,10 @@ class AnswerType(DjangoObjectType):
 class Query(graphene.ObjectType):
 
     all_quiz = DjangoListField(QuizType)
+    
+    all_questions = DjangoListField(QuestionType)
 
-    # def resolve_quiz(root, info):
-    #     return f'This is the first question'
+   
 
 
 schema = graphene.Schema(query=Query)
