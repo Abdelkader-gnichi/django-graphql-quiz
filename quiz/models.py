@@ -33,16 +33,16 @@ class Quiz(BaseModel):
     
 
 SCALE = {
-    '0': _('Fundamental'),
-    '1': _('Beginner'),
-    '2': _('Intermediate'),
-    '3': _('Advanced'),
-    '4': _('Expert')
+    0: _('Fundamental'),
+    1: _('Beginner'),
+    2: _('Intermediate'),
+    3: _('Advanced'),
+    4: _('Expert')
 }
 
 TYPE = {
-    '0': _('Multiple Choices'),
-    '1': _('Single Choice')
+    0: _('Multiple Choices'),
+    1: _('Single Choice')
 }
 
 class Question(BaseModel):
