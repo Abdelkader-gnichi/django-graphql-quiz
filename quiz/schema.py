@@ -27,9 +27,16 @@ class AnswerType(DjangoObjectType):
 class Query(graphene.ObjectType):
 
     all_quiz = DjangoListField(QuizType)
-    
-    all_questions = DjangoListField(QuestionType)
 
+    all_questions = graphene.List(QuestionType)
+
+    quiz_by_id = graphene.Field(QuizType, id=graphene.UUID())
+    
+    def resolve_quiz_by_id(root, info, id):
+        return Quiz.objects.get(id=id)
+    
+    def resolve_all_questions(root, info):
+        return Question.objects.all()
    
 
 
