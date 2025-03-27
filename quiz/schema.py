@@ -51,11 +51,27 @@ class Query(graphene.ObjectType):
     def resolve_answers_by_question_id(root, info, id):
         return Answer.objects.filter(question__id=id)
 
-class CategoryMutationPayload(graphene.ObjectType):
+
+class ResourceUnion(graphene.Union):
+    class Meta:
+        # List all the Graphene types that can be returned in the 'resource' field
+        types = (CategoryType, QuizType) 
+    
+    # Optional: You might need resolve_type if Graphene can't automatically determine
+    # which type an object belongs to (usually not needed with DjangoObjectType)
+    # @staticmethod
+    # def resolve_type(obj, info):
+    #     if isinstance(obj, Category):
+    #         return CategoryType
+    #     if isinstance(obj, User):
+    #         return UserType
+    #     return None # Should not happen in success case
+
+class GenericMutationPayload(graphene.ObjectType):
 
     success = graphene.Boolean(description="Boolean Filed that indicates Mutation status.")
 
-    category = graphene.Field(CategoryType, description="Return the Category if successful.")
+    resource = graphene.Field(ResourceUnion, description="Return the Resource if successful.")
 
     error = graphene.String(description="Error message if the mutation failed.")
 
@@ -80,7 +96,7 @@ class UpdateCategory(graphene.Mutation):
         id = graphene.UUID()
         name = graphene.String(required=True)
 
-    Output = CategoryMutationPayload
+    Output = GenericMutationPayload
 
     @classmethod
     def mutate(cls, root, info, id, name):
@@ -90,11 +106,11 @@ class UpdateCategory(graphene.Mutation):
             
             category.name = name
             category.save()
-            return CategoryMutationPayload(success=True, category=category, error=None)
+            return GenericMutationPayload(success=True, resource=category, error=None)
         except Category.DoesNotExist as e:
-            return CategoryMutationPayload(success=False, category=None, error=f'category with id {id} doesn\'t exists.')
+            return GenericMutationPayload(success=False, resource=None, error=f'category with id {id} doesn\'t exists.')
         except Exception as e:
-            return CategoryMutationPayload(success=False, category=None, error=f'{e}')
+            return GenericMutationPayload(success=False, resource=None, error=f'{e}')
         
 class Mutation(graphene.ObjectType):
 
