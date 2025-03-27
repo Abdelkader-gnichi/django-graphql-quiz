@@ -51,6 +51,14 @@ class Query(graphene.ObjectType):
     def resolve_answers_by_question_id(root, info, id):
         return Answer.objects.filter(question__id=id)
 
+class CategoryMutationPayload(graphene.ObjectType):
+
+    success = graphene.Boolean(description="Boolean Filed that indicates Mutation status.")
+
+    category = graphene.Field(CategoryType, description="Return the Category if successful.")
+
+    error = graphene.String(description="Error message if the mutation failed.")
+
 
 class CreateCategory(graphene.Mutation):
 
@@ -72,17 +80,22 @@ class UpdateCategory(graphene.Mutation):
         id = graphene.UUID()
         name = graphene.String(required=True)
 
-    category = graphene.Field(CategoryType)
+    Output = CategoryMutationPayload
 
     @classmethod
     def mutate(cls, root, info, id, name):
-        
-        category = Category.objects.get(id=id)
-        
-        category.name = name
-        category.save()
-        return UpdateCategory(category=category)
 
+        try:
+            category = Category.objects.get(id=id)
+            
+            category.name = name
+            category.save()
+            return CategoryMutationPayload(success=True, category=category, error=None)
+        except Category.DoesNotExist as e:
+            return CategoryMutationPayload(success=False, category=None, error=f'category with id {id} doesn\'t exists.')
+        except Exception as e:
+            return CategoryMutationPayload(success=False, category=None, error=f'{e}')
+        
 class Mutation(graphene.ObjectType):
 
     create_category =  CreateCategory.Field()
