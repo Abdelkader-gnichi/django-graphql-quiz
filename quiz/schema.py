@@ -67,13 +67,19 @@ class ResourceUnion(graphene.Union):
     #         return UserType
     #     return None # Should not happen in success case
 
-class GenericMutationPayload(graphene.ObjectType):
 
+class BaseMutationPayload(graphene.ObjectType):
     success = graphene.Boolean(description="Boolean Filed that indicates Mutation status.")
-
-    resource = graphene.Field(ResourceUnion, description="Return the Resource if successful.")
-
     error = graphene.String(description="Error message if the mutation failed.")
+
+    class Meta:
+        abstract = True
+
+class CategoryMutationPayload(BaseMutationPayload):
+
+    category = graphene.Field(CategoryType, description="Return the category if successful.")
+
+    
 
 
 class CreateCategory(graphene.Mutation):
@@ -96,7 +102,7 @@ class UpdateCategory(graphene.Mutation):
         id = graphene.UUID()
         name = graphene.String(required=True)
 
-    Output = GenericMutationPayload
+    Output = CategoryMutationPayload
 
     @classmethod
     def mutate(cls, root, info, id, name):
@@ -106,11 +112,11 @@ class UpdateCategory(graphene.Mutation):
             
             category.name = name
             category.save()
-            return GenericMutationPayload(success=True, resource=category, error=None)
+            return CategoryMutationPayload(success=True, category=category, error=None)
         except Category.DoesNotExist as e:
-            return GenericMutationPayload(success=False, resource=None, error=f'category with id {id} doesn\'t exists.')
+            return CategoryMutationPayload(success=False, category=None, error=f'category with id {id} doesn\'t exists.')
         except Exception as e:
-            return GenericMutationPayload(success=False, resource=None, error=f'{e}')
+            return CategoryMutationPayload(success=False, category=None, error=f'{e}')
         
 class Mutation(graphene.ObjectType):
 
