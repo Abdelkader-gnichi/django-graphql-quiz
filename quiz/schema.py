@@ -117,10 +117,31 @@ class UpdateCategory(graphene.Mutation):
             return CategoryMutationPayload(success=False, category=None, error=f'category with id {id} doesn\'t exists.')
         except Exception as e:
             return CategoryMutationPayload(success=False, category=None, error=f'{e}')
+
+class DeleteCategory(graphene.Mutation):
+    
+    class Arguments:
+        id = graphene.UUID()
+
+    
+    Output = CategoryMutationPayload
+
+    @classmethod
+    def mutate(cls, root, info, id):
+        try:
+            category = Category.objects.get(id=id)
+            category.delete()
+            return CategoryMutationPayload(success=True, category=None, error=None)
+        except Category.DoesNotExist as e:
+            return CategoryMutationPayload(success=False, category=None, error=f'Category with id {id} doesn\'t exists.')
         
+        except Exception as e:
+            return CategoryMutationPayload(success=False, category=category, error=f'{e}')
+
 class Mutation(graphene.ObjectType):
 
     create_category =  CreateCategory.Field()
     update_category = UpdateCategory.Field()
+    delete_category = DeleteCategory.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
