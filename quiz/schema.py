@@ -51,4 +51,22 @@ class Query(graphene.ObjectType):
         return Answer.objects.filter(question__id=id)
 
 
-schema = graphene.Schema(query=Query)
+class CreateCategory(graphene.Mutation):
+
+    class Arguments:
+        name = graphene.String(required=True)
+
+    category = graphene.Field(CategoryType)
+
+    @classmethod
+    def mutate(cls, root, info, name):
+        # category = Category.objects.create(name=name)
+        category = Category(name=name)
+        category.save()
+        return CreateCategory(category=category)
+
+class Mutation(graphene.ObjectType):
+
+    create_category =  CreateCategory.Field()
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
