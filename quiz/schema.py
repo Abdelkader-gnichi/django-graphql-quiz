@@ -48,7 +48,6 @@ class Query(graphene.ObjectType):
         return Question.objects.get(id=id)
     
     def resolve_answers_by_question_id(root, info, id):
-        print(id)
         return Answer.objects.filter(question__id=id)
 
 
