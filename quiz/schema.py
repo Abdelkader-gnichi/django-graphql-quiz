@@ -1,4 +1,5 @@
 import graphene
+from django.http import Http404
 from graphene_django import DjangoObjectType, DjangoListField
 from .models import Category, Quiz, Question, Answer
 
@@ -65,8 +66,26 @@ class CreateCategory(graphene.Mutation):
         category.save()
         return CreateCategory(category=category)
 
+class UpdateCategory(graphene.Mutation):
+
+    class Arguments:
+        id = graphene.UUID()
+        name = graphene.String(required=True)
+
+    category = graphene.Field(CategoryType)
+
+    @classmethod
+    def mutate(cls, root, info, id, name):
+        
+        category = Category.objects.get(id=id)
+        
+        category.name = name
+        category.save()
+        return UpdateCategory(category=category)
+
 class Mutation(graphene.ObjectType):
 
     create_category =  CreateCategory.Field()
+    update_category = UpdateCategory.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
